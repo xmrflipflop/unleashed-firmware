@@ -1,4 +1,4 @@
-#include "somfy_telis.h"
+#include "vertilux.h"
 #include <lib/toolbox/manchester_decoder.h>
 
 #include "../blocks/const.h"
@@ -9,16 +9,16 @@
 
 #include "../blocks/custom_btn_i.h"
 
-#define TAG "SubGhzProtocolSomfyTelis"
+#define TAG "SubGhzProtocolVertilux"
 
-static const SubGhzBlockConst subghz_protocol_somfy_telis_const = {
+static const SubGhzBlockConst subghz_protocol_vertilux_const = {
     .te_short = 640,
     .te_long = 1280,
     .te_delta = 250,
     .min_count_bit_for_found = 56,
 };
 
-struct SubGhzProtocolDecoderSomfyTelis {
+struct SubGhzProtocolDecoderVertilux {
     SubGhzProtocolDecoderBase base;
 
     SubGhzBlockDecoder decoder;
@@ -28,7 +28,7 @@ struct SubGhzProtocolDecoderSomfyTelis {
     ManchesterState manchester_saved_state;
 };
 
-struct SubGhzProtocolEncoderSomfyTelis {
+struct SubGhzProtocolEncoderVertilux {
     SubGhzProtocolEncoderBase base;
 
     SubGhzProtocolBlockEncoder encoder;
@@ -36,50 +36,50 @@ struct SubGhzProtocolEncoderSomfyTelis {
 };
 
 typedef enum {
-    SomfyTelisDecoderStepReset = 0,
-    SomfyTelisDecoderStepCheckPreambula,
-    SomfyTelisDecoderStepFoundPreambula,
-    SomfyTelisDecoderStepStartDecode,
-    SomfyTelisDecoderStepDecoderData,
-} SomfyTelisDecoderStep;
+    VertiluxDecoderStepReset = 0,
+    VertiluxDecoderStepCheckPreambula,
+    VertiluxDecoderStepFoundPreambula,
+    VertiluxDecoderStepStartDecode,
+    VertiluxDecoderStepDecoderData,
+} VertiluxDecoderStep;
 
-const SubGhzProtocolDecoder subghz_protocol_somfy_telis_decoder = {
-    .alloc = subghz_protocol_decoder_somfy_telis_alloc,
-    .free = subghz_protocol_decoder_somfy_telis_free,
+const SubGhzProtocolDecoder subghz_protocol_vertilux_decoder = {
+    .alloc = subghz_protocol_decoder_vertilux_alloc,
+    .free = subghz_protocol_decoder_vertilux_free,
 
-    .feed = subghz_protocol_decoder_somfy_telis_feed,
-    .reset = subghz_protocol_decoder_somfy_telis_reset,
+    .feed = subghz_protocol_decoder_vertilux_feed,
+    .reset = subghz_protocol_decoder_vertilux_reset,
 
-    .get_hash_data = subghz_protocol_decoder_somfy_telis_get_hash_data,
-    .serialize = subghz_protocol_decoder_somfy_telis_serialize,
-    .deserialize = subghz_protocol_decoder_somfy_telis_deserialize,
-    .get_string = subghz_protocol_decoder_somfy_telis_get_string,
+    .get_hash_data = subghz_protocol_decoder_vertilux_get_hash_data,
+    .serialize = subghz_protocol_decoder_vertilux_serialize,
+    .deserialize = subghz_protocol_decoder_vertilux_deserialize,
+    .get_string = subghz_protocol_decoder_vertilux_get_string,
 };
 
-const SubGhzProtocolEncoder subghz_protocol_somfy_telis_encoder = {
-    .alloc = subghz_protocol_encoder_somfy_telis_alloc,
-    .free = subghz_protocol_encoder_somfy_telis_free,
+const SubGhzProtocolEncoder subghz_protocol_vertilux_encoder = {
+    .alloc = subghz_protocol_encoder_vertilux_alloc,
+    .free = subghz_protocol_encoder_vertilux_free,
 
-    .deserialize = subghz_protocol_encoder_somfy_telis_deserialize,
-    .stop = subghz_protocol_encoder_somfy_telis_stop,
-    .yield = subghz_protocol_encoder_somfy_telis_yield,
+    .deserialize = subghz_protocol_encoder_vertilux_deserialize,
+    .stop = subghz_protocol_encoder_vertilux_stop,
+    .yield = subghz_protocol_encoder_vertilux_yield,
 };
 
-const SubGhzProtocol subghz_protocol_somfy_telis = {
-    .name = SUBGHZ_PROTOCOL_SOMFY_TELIS_NAME,
+const SubGhzProtocol subghz_protocol_vertilux = {
+    .name = SUBGHZ_PROTOCOL_VERTILUX_NAME,
     .type = SubGhzProtocolTypeDynamic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_AM |
             SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
-    .decoder = &subghz_protocol_somfy_telis_decoder,
-    .encoder = &subghz_protocol_somfy_telis_encoder,
+    .decoder = &subghz_protocol_vertilux_decoder,
+    .encoder = &subghz_protocol_vertilux_encoder,
 };
 
-void* subghz_protocol_encoder_somfy_telis_alloc(SubGhzEnvironment* environment) {
+void* subghz_protocol_encoder_vertilux_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
-    SubGhzProtocolEncoderSomfyTelis* instance = malloc(sizeof(SubGhzProtocolEncoderSomfyTelis));
+    SubGhzProtocolEncoderVertilux* instance = malloc(sizeof(SubGhzProtocolEncoderVertilux));
 
-    instance->base.protocol = &subghz_protocol_somfy_telis;
+    instance->base.protocol = &subghz_protocol_vertilux;
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
@@ -90,9 +90,9 @@ void* subghz_protocol_encoder_somfy_telis_alloc(SubGhzEnvironment* environment) 
     return instance;
 }
 
-void subghz_protocol_encoder_somfy_telis_free(void* context) {
+void subghz_protocol_encoder_vertilux_free(void* context) {
     furi_assert(context);
-    SubGhzProtocolEncoderSomfyTelis* instance = context;
+    SubGhzProtocolEncoderVertilux* instance = context;
     free(instance->encoder.upload);
     free(instance);
 }
@@ -102,10 +102,10 @@ void subghz_protocol_encoder_somfy_telis_free(void* context) {
  * Basic set | 0x1 | 0x2 | 0x4 | 0x8 |
  * @return Button code
  */
-static uint8_t subghz_protocol_somfy_telis_get_btn_code();
+static uint8_t subghz_protocol_vertilux_get_btn_code();
 
-static bool subghz_protocol_somfy_telis_gen_data(
-    SubGhzProtocolEncoderSomfyTelis* instance,
+static bool subghz_protocol_vertilux_gen_data(
+    SubGhzProtocolEncoderVertilux* instance,
     uint8_t btn,
     bool new_remote) {
     // If we doing a clone we will use its data
@@ -122,7 +122,7 @@ static bool subghz_protocol_somfy_telis_gen_data(
         subghz_custom_btn_set_original(btn);
     }
 
-    btn = subghz_protocol_somfy_telis_get_btn_code();
+    btn = subghz_protocol_vertilux_get_btn_code();
 
     if(instance->generic.cnt < 0xFFFF) {
         if((instance->generic.cnt + furi_hal_subghz_get_rolling_counter_mult()) > 0xFFFF) {
@@ -167,7 +167,7 @@ static bool subghz_protocol_somfy_telis_gen_data(
     return true;
 }
 
-bool subghz_protocol_somfy_telis_create_data(
+bool subghz_protocol_vertilux_create_data(
     void* context,
     FlipperFormat* flipper_format,
     uint32_t serial,
@@ -175,11 +175,11 @@ bool subghz_protocol_somfy_telis_create_data(
     uint16_t cnt,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
-    SubGhzProtocolEncoderSomfyTelis* instance = context;
+    SubGhzProtocolEncoderVertilux* instance = context;
     instance->generic.serial = serial;
     instance->generic.cnt = cnt;
     instance->generic.data_count_bit = 56;
-    bool res = subghz_protocol_somfy_telis_gen_data(instance, btn, true);
+    bool res = subghz_protocol_vertilux_gen_data(instance, btn, true);
     if(res) {
         return SubGhzProtocolStatusOk ==
                subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
@@ -189,16 +189,16 @@ bool subghz_protocol_somfy_telis_create_data(
 
 /**
  * Generating an upload from data.
- * @param instance Pointer to a SubGhzProtocolEncoderSomfyTelis instance
+ * @param instance Pointer to a SubGhzProtocolEncoderVertilux instance
  * @return true On success
  */
-static bool subghz_protocol_encoder_somfy_telis_get_upload(
-    SubGhzProtocolEncoderSomfyTelis* instance,
+static bool subghz_protocol_encoder_vertilux_get_upload(
+    SubGhzProtocolEncoderVertilux* instance,
     uint8_t btn) {
     furi_assert(instance);
 
     // Gen new key
-    if(!subghz_protocol_somfy_telis_gen_data(instance, btn, false)) {
+    if(!subghz_protocol_vertilux_gen_data(instance, btn, false)) {
         return false;
     }
 
@@ -211,14 +211,14 @@ static bool subghz_protocol_encoder_somfy_telis_get_upload(
     //Hardware sync
     for(uint8_t i = 0; i < 2; ++i) {
         instance->encoder.upload[index++] = level_duration_make(
-            true, (uint32_t)subghz_protocol_somfy_telis_const.te_short * 4); // 1
+            true, (uint32_t)subghz_protocol_vertilux_const.te_short * 4); // 1
         instance->encoder.upload[index++] = level_duration_make(
-            false, (uint32_t)subghz_protocol_somfy_telis_const.te_short * 4); // 0
+            false, (uint32_t)subghz_protocol_vertilux_const.te_short * 4); // 0
     }
     //Software sync
     instance->encoder.upload[index++] = level_duration_make(true, (uint32_t)4550); // 1
     instance->encoder.upload[index++] =
-        level_duration_make(false, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 0
+        level_duration_make(false, (uint32_t)subghz_protocol_vertilux_const.te_short); // 0
 
     //Send key data MSB manchester
 
@@ -227,24 +227,24 @@ static bool subghz_protocol_encoder_somfy_telis_get_upload(
             if(instance->encoder.upload[index - 1].level == LEVEL_DURATION_LEVEL_LOW) {
                 instance->encoder.upload[index - 1].duration *= 2; // 00
                 instance->encoder.upload[index++] = level_duration_make(
-                    true, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 1
+                    true, (uint32_t)subghz_protocol_vertilux_const.te_short); // 1
             } else {
                 instance->encoder.upload[index++] = level_duration_make(
-                    false, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 0
+                    false, (uint32_t)subghz_protocol_vertilux_const.te_short); // 0
                 instance->encoder.upload[index++] = level_duration_make(
-                    true, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 1
+                    true, (uint32_t)subghz_protocol_vertilux_const.te_short); // 1
             }
 
         } else {
             if(instance->encoder.upload[index - 1].level == LEVEL_DURATION_LEVEL_HIGH) {
                 instance->encoder.upload[index - 1].duration *= 2; // 11
                 instance->encoder.upload[index++] = level_duration_make(
-                    false, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 0
+                    false, (uint32_t)subghz_protocol_vertilux_const.te_short); // 0
             } else {
                 instance->encoder.upload[index++] = level_duration_make(
-                    true, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 1
+                    true, (uint32_t)subghz_protocol_vertilux_const.te_short); // 1
                 instance->encoder.upload[index++] = level_duration_make(
-                    false, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 0
+                    false, (uint32_t)subghz_protocol_vertilux_const.te_short); // 0
             }
         }
     }
@@ -261,14 +261,14 @@ static bool subghz_protocol_encoder_somfy_telis_get_upload(
         //Hardware sync
         for(uint8_t i = 0; i < 7; ++i) {
             instance->encoder.upload[index++] = level_duration_make(
-                true, (uint32_t)subghz_protocol_somfy_telis_const.te_short * 4); // 1
+                true, (uint32_t)subghz_protocol_vertilux_const.te_short * 4); // 1
             instance->encoder.upload[index++] = level_duration_make(
-                false, (uint32_t)subghz_protocol_somfy_telis_const.te_short * 4); // 0
+                false, (uint32_t)subghz_protocol_vertilux_const.te_short * 4); // 0
         }
         //Software sync
         instance->encoder.upload[index++] = level_duration_make(true, (uint32_t)4550); // 1
         instance->encoder.upload[index++] =
-            level_duration_make(false, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 0
+            level_duration_make(false, (uint32_t)subghz_protocol_vertilux_const.te_short); // 0
 
         //Send key data MSB manchester
 
@@ -277,24 +277,24 @@ static bool subghz_protocol_encoder_somfy_telis_get_upload(
                 if(instance->encoder.upload[index - 1].level == LEVEL_DURATION_LEVEL_LOW) {
                     instance->encoder.upload[index - 1].duration *= 2; // 00
                     instance->encoder.upload[index++] = level_duration_make(
-                        true, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 1
+                        true, (uint32_t)subghz_protocol_vertilux_const.te_short); // 1
                 } else {
                     instance->encoder.upload[index++] = level_duration_make(
-                        false, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 0
+                        false, (uint32_t)subghz_protocol_vertilux_const.te_short); // 0
                     instance->encoder.upload[index++] = level_duration_make(
-                        true, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 1
+                        true, (uint32_t)subghz_protocol_vertilux_const.te_short); // 1
                 }
 
             } else {
                 if(instance->encoder.upload[index - 1].level == LEVEL_DURATION_LEVEL_HIGH) {
                     instance->encoder.upload[index - 1].duration *= 2; // 11
                     instance->encoder.upload[index++] = level_duration_make(
-                        false, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 0
+                        false, (uint32_t)subghz_protocol_vertilux_const.te_short); // 0
                 } else {
                     instance->encoder.upload[index++] = level_duration_make(
-                        true, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 1
+                        true, (uint32_t)subghz_protocol_vertilux_const.te_short); // 1
                     instance->encoder.upload[index++] = level_duration_make(
-                        false, (uint32_t)subghz_protocol_somfy_telis_const.te_short); // 0
+                        false, (uint32_t)subghz_protocol_vertilux_const.te_short); // 0
                 }
             }
         }
@@ -319,9 +319,9 @@ static bool subghz_protocol_encoder_somfy_telis_get_upload(
 }
 
 SubGhzProtocolStatus
-    subghz_protocol_encoder_somfy_telis_deserialize(void* context, FlipperFormat* flipper_format) {
+    subghz_protocol_encoder_vertilux_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
-    SubGhzProtocolEncoderSomfyTelis* instance = context;
+    SubGhzProtocolEncoderVertilux* instance = context;
     SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     do {
         if(SubGhzProtocolStatusOk !=
@@ -334,7 +334,7 @@ SubGhzProtocolStatus
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_somfy_telis_get_upload(instance, instance->generic.btn);
+        subghz_protocol_encoder_vertilux_get_upload(instance, instance->generic.btn);
 
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
@@ -357,13 +357,13 @@ SubGhzProtocolStatus
     return res;
 }
 
-void subghz_protocol_encoder_somfy_telis_stop(void* context) {
-    SubGhzProtocolEncoderSomfyTelis* instance = context;
+void subghz_protocol_encoder_vertilux_stop(void* context) {
+    SubGhzProtocolEncoderVertilux* instance = context;
     instance->encoder.is_running = false;
 }
 
-LevelDuration subghz_protocol_encoder_somfy_telis_yield(void* context) {
-    SubGhzProtocolEncoderSomfyTelis* instance = context;
+LevelDuration subghz_protocol_encoder_vertilux_yield(void* context) {
+    SubGhzProtocolEncoderVertilux* instance = context;
 
     if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
         instance->encoder.is_running = false;
@@ -380,25 +380,25 @@ LevelDuration subghz_protocol_encoder_somfy_telis_yield(void* context) {
     return ret;
 }
 
-void* subghz_protocol_decoder_somfy_telis_alloc(SubGhzEnvironment* environment) {
+void* subghz_protocol_decoder_vertilux_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
-    SubGhzProtocolDecoderSomfyTelis* instance = malloc(sizeof(SubGhzProtocolDecoderSomfyTelis));
-    instance->base.protocol = &subghz_protocol_somfy_telis;
+    SubGhzProtocolDecoderVertilux* instance = malloc(sizeof(SubGhzProtocolDecoderVertilux));
+    instance->base.protocol = &subghz_protocol_vertilux;
     instance->generic.protocol_name = instance->base.protocol->name;
 
     return instance;
 }
 
-void subghz_protocol_decoder_somfy_telis_free(void* context) {
+void subghz_protocol_decoder_vertilux_free(void* context) {
     furi_assert(context);
-    SubGhzProtocolDecoderSomfyTelis* instance = context;
+    SubGhzProtocolDecoderVertilux* instance = context;
     free(instance);
 }
 
-void subghz_protocol_decoder_somfy_telis_reset(void* context) {
+void subghz_protocol_decoder_vertilux_reset(void* context) {
     furi_assert(context);
-    SubGhzProtocolDecoderSomfyTelis* instance = context;
-    instance->decoder.parser_step = SomfyTelisDecoderStepReset;
+    SubGhzProtocolDecoderVertilux* instance = context;
+    instance->decoder.parser_step = VertiluxDecoderStepReset;
     manchester_advance(
         instance->manchester_saved_state,
         ManchesterEventReset,
@@ -411,7 +411,7 @@ void subghz_protocol_decoder_somfy_telis_reset(void* context) {
  * @param data Вata for checksum calculation
  * @return CRC
  */
-static uint8_t subghz_protocol_somfy_telis_crc(uint64_t data) {
+static uint8_t subghz_protocol_vertilux_crc(uint64_t data) {
     uint8_t crc = 0;
     data &= 0xFFF0FFFFFFFFFF;
     for(uint8_t i = 0; i < 56; i += 8) {
@@ -420,39 +420,39 @@ static uint8_t subghz_protocol_somfy_telis_crc(uint64_t data) {
     return crc & 0xf;
 }
 
-void subghz_protocol_decoder_somfy_telis_feed(void* context, bool level, uint32_t duration) {
+void subghz_protocol_decoder_vertilux_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
-    SubGhzProtocolDecoderSomfyTelis* instance = context;
+    SubGhzProtocolDecoderVertilux* instance = context;
 
     ManchesterEvent event = ManchesterEventReset;
     switch(instance->decoder.parser_step) {
-    case SomfyTelisDecoderStepReset:
-        if((level) && DURATION_DIFF(duration, subghz_protocol_somfy_telis_const.te_short * 4) <
-                          subghz_protocol_somfy_telis_const.te_delta * 4) {
-            instance->decoder.parser_step = SomfyTelisDecoderStepFoundPreambula;
+    case VertiluxDecoderStepReset:
+        if((level) && DURATION_DIFF(duration, subghz_protocol_vertilux_const.te_short * 4) <
+                          subghz_protocol_vertilux_const.te_delta * 4) {
+            instance->decoder.parser_step = VertiluxDecoderStepFoundPreambula;
             instance->header_count++;
         }
         break;
-    case SomfyTelisDecoderStepFoundPreambula:
-        if((!level) && (DURATION_DIFF(duration, subghz_protocol_somfy_telis_const.te_short * 4) <
-                        subghz_protocol_somfy_telis_const.te_delta * 4)) {
-            instance->decoder.parser_step = SomfyTelisDecoderStepCheckPreambula;
+    case VertiluxDecoderStepFoundPreambula:
+        if((!level) && (DURATION_DIFF(duration, subghz_protocol_vertilux_const.te_short * 4) <
+                        subghz_protocol_vertilux_const.te_delta * 4)) {
+            instance->decoder.parser_step = VertiluxDecoderStepCheckPreambula;
         } else {
             instance->header_count = 0;
-            instance->decoder.parser_step = SomfyTelisDecoderStepReset;
+            instance->decoder.parser_step = VertiluxDecoderStepReset;
         }
         break;
-    case SomfyTelisDecoderStepCheckPreambula:
+    case VertiluxDecoderStepCheckPreambula:
         if(level) {
-            if(DURATION_DIFF(duration, subghz_protocol_somfy_telis_const.te_short * 4) <
-               subghz_protocol_somfy_telis_const.te_delta * 4) {
-                instance->decoder.parser_step = SomfyTelisDecoderStepFoundPreambula;
+            if(DURATION_DIFF(duration, subghz_protocol_vertilux_const.te_short * 4) <
+               subghz_protocol_vertilux_const.te_delta * 4) {
+                instance->decoder.parser_step = VertiluxDecoderStepFoundPreambula;
                 instance->header_count++;
             } else if(
                 (instance->header_count > 1) &&
-                (DURATION_DIFF(duration, subghz_protocol_somfy_telis_const.te_short * 7) <
-                 subghz_protocol_somfy_telis_const.te_delta * 4)) {
-                instance->decoder.parser_step = SomfyTelisDecoderStepDecoderData;
+                (DURATION_DIFF(duration, subghz_protocol_vertilux_const.te_short * 7) <
+                 subghz_protocol_vertilux_const.te_delta * 4)) {
+                instance->decoder.parser_step = VertiluxDecoderStepDecoderData;
                 instance->decoder.decode_data = 0;
                 instance->decoder.decode_count_bit = 0;
                 instance->header_count = 0;
@@ -471,24 +471,24 @@ void subghz_protocol_decoder_somfy_telis_feed(void* context, bool level, uint32_
 
         break;
 
-    case SomfyTelisDecoderStepDecoderData:
+    case VertiluxDecoderStepDecoderData:
         if(!level) {
-            if(DURATION_DIFF(duration, subghz_protocol_somfy_telis_const.te_short) <
-               subghz_protocol_somfy_telis_const.te_delta) {
+            if(DURATION_DIFF(duration, subghz_protocol_vertilux_const.te_short) <
+               subghz_protocol_vertilux_const.te_delta) {
                 event = ManchesterEventShortLow;
             } else if(
-                DURATION_DIFF(duration, subghz_protocol_somfy_telis_const.te_long) <
-                subghz_protocol_somfy_telis_const.te_delta) {
+                DURATION_DIFF(duration, subghz_protocol_vertilux_const.te_long) <
+                subghz_protocol_vertilux_const.te_delta) {
                 event = ManchesterEventLongLow;
             } else if(
-                duration >= (subghz_protocol_somfy_telis_const.te_long +
-                             subghz_protocol_somfy_telis_const.te_delta)) {
+                duration >= (subghz_protocol_vertilux_const.te_long +
+                             subghz_protocol_vertilux_const.te_delta)) {
                 if(instance->decoder.decode_count_bit ==
-                   subghz_protocol_somfy_telis_const.min_count_bit_for_found) {
+                   subghz_protocol_vertilux_const.min_count_bit_for_found) {
                     //check crc
                     uint64_t data_tmp = instance->decoder.decode_data ^
                                         (instance->decoder.decode_data >> 8);
-                    if(((data_tmp >> 40) & 0xF) == subghz_protocol_somfy_telis_crc(data_tmp)) {
+                    if(((data_tmp >> 40) & 0xF) == subghz_protocol_vertilux_crc(data_tmp)) {
                         instance->generic.data = instance->decoder.decode_data;
                         instance->generic.data_count_bit = instance->decoder.decode_count_bit;
 
@@ -508,20 +508,20 @@ void subghz_protocol_decoder_somfy_telis_feed(void* context, bool level, uint32_
                     ManchesterEventLongHigh,
                     &instance->manchester_saved_state,
                     NULL);
-                instance->decoder.parser_step = SomfyTelisDecoderStepReset;
+                instance->decoder.parser_step = VertiluxDecoderStepReset;
             } else {
-                instance->decoder.parser_step = SomfyTelisDecoderStepReset;
+                instance->decoder.parser_step = VertiluxDecoderStepReset;
             }
         } else {
-            if(DURATION_DIFF(duration, subghz_protocol_somfy_telis_const.te_short) <
-               subghz_protocol_somfy_telis_const.te_delta) {
+            if(DURATION_DIFF(duration, subghz_protocol_vertilux_const.te_short) <
+               subghz_protocol_vertilux_const.te_delta) {
                 event = ManchesterEventShortHigh;
             } else if(
-                DURATION_DIFF(duration, subghz_protocol_somfy_telis_const.te_long) <
-                subghz_protocol_somfy_telis_const.te_delta) {
+                DURATION_DIFF(duration, subghz_protocol_vertilux_const.te_long) <
+                subghz_protocol_vertilux_const.te_delta) {
                 event = ManchesterEventLongHigh;
             } else {
-                instance->decoder.parser_step = SomfyTelisDecoderStepReset;
+                instance->decoder.parser_step = VertiluxDecoderStepReset;
             }
         }
         if(event != ManchesterEventReset) {
@@ -542,7 +542,7 @@ void subghz_protocol_decoder_somfy_telis_feed(void* context, bool level, uint32_
  * Analysis of received data
  * @param instance Pointer to a SubGhzBlockGeneric* instance
  */
-static void subghz_protocol_somfy_telis_check_remote_controller(SubGhzBlockGeneric* instance) {
+static void subghz_protocol_vertilux_check_remote_controller(SubGhzBlockGeneric* instance) {
     //https://pushstack.wordpress.com/somfy-rts-protocol/
     /*
  *                                                  604 us
@@ -621,7 +621,7 @@ static void subghz_protocol_somfy_telis_check_remote_controller(SubGhzBlockGener
  * Get button name.
  * @param btn Button number, 4 bit
  */
-static const char* subghz_protocol_somfy_telis_get_name_button(uint8_t btn) {
+static const char* subghz_protocol_vertilux_get_name_button(uint8_t btn) {
     const char* name_btn[16] = {
         "Unknown",
         "My",
@@ -642,33 +642,33 @@ static const char* subghz_protocol_somfy_telis_get_name_button(uint8_t btn) {
     return btn <= 0xf ? name_btn[btn] : name_btn[0];
 }
 
-uint8_t subghz_protocol_decoder_somfy_telis_get_hash_data(void* context) {
+uint8_t subghz_protocol_decoder_vertilux_get_hash_data(void* context) {
     furi_assert(context);
-    SubGhzProtocolDecoderSomfyTelis* instance = context;
+    SubGhzProtocolDecoderVertilux* instance = context;
     return subghz_protocol_blocks_get_hash_data(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolStatus subghz_protocol_decoder_somfy_telis_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_vertilux_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
-    SubGhzProtocolDecoderSomfyTelis* instance = context;
+    SubGhzProtocolDecoderVertilux* instance = context;
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
 SubGhzProtocolStatus
-    subghz_protocol_decoder_somfy_telis_deserialize(void* context, FlipperFormat* flipper_format) {
+    subghz_protocol_decoder_vertilux_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
-    SubGhzProtocolDecoderSomfyTelis* instance = context;
+    SubGhzProtocolDecoderVertilux* instance = context;
     return subghz_block_generic_deserialize_check_count_bit(
         &instance->generic,
         flipper_format,
-        subghz_protocol_somfy_telis_const.min_count_bit_for_found);
+        subghz_protocol_vertilux_const.min_count_bit_for_found);
 }
 
-static uint8_t subghz_protocol_somfy_telis_get_btn_code() {
+static uint8_t subghz_protocol_vertilux_get_btn_code() {
     uint8_t custom_btn_id = subghz_custom_btn_get();
     uint8_t original_btn_code = subghz_custom_btn_get_original();
     uint8_t btn = original_btn_code;
@@ -736,11 +736,11 @@ static uint8_t subghz_protocol_somfy_telis_get_btn_code() {
     return btn;
 }
 
-void subghz_protocol_decoder_somfy_telis_get_string(void* context, FuriString* output) {
+void subghz_protocol_decoder_vertilux_get_string(void* context, FuriString* output) {
     furi_assert(context);
-    SubGhzProtocolDecoderSomfyTelis* instance = context;
+    SubGhzProtocolDecoderVertilux* instance = context;
 
-    subghz_protocol_somfy_telis_check_remote_controller(&instance->generic);
+    subghz_protocol_vertilux_check_remote_controller(&instance->generic);
     furi_string_cat_printf(
         output,
         "%s %db\r\n"
@@ -755,5 +755,5 @@ void subghz_protocol_decoder_somfy_telis_get_string(void* context, FuriString* o
         (uint32_t)instance->generic.data,
         instance->generic.serial,
         instance->generic.cnt,
-        subghz_protocol_somfy_telis_get_name_button(instance->generic.btn));
+        subghz_protocol_vertilux_get_name_button(instance->generic.btn));
 }

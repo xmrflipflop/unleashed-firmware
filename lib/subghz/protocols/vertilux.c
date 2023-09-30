@@ -111,7 +111,7 @@ static bool subghz_protocol_vertilux_gen_data(
     // If we doing a clone we will use its data
     uint64_t data = instance->generic.data ^ (instance->generic.data >> 8);
     if(!new_remote) {
-        instance->generic.btn = (data >> 44) & 0xF; // ctrl
+        instance->generic.btn = (data >> 48) & 0xF; // ctrl
         btn = instance->generic.btn;
         instance->generic.cnt = (data >> 24) & 0xFFFF; // rolling code
         instance->generic.serial = data & 0xFFFFFF; // address
@@ -136,11 +136,12 @@ static bool subghz_protocol_vertilux_gen_data(
 
     uint8_t frame[7];
     if(!new_remote) {
-        frame[0] = data >> 48;
+        frame[0] = data >> 48 & 0xF0;
     } else {
-        frame[0] = 0xA7;
+        frame[0] = 0x90;
     }
-    frame[1] = btn << 4;
+    frame[0] |= btn;
+    frame[1] = 0xF0;
     frame[2] = instance->generic.cnt >> 8;
     frame[3] = instance->generic.cnt;
     frame[4] = instance->generic.serial >> 16;
@@ -558,15 +559,26 @@ static void subghz_protocol_vertilux_check_remote_controller(SubGhzBlockGeneric*
  * 
  *     encrypt              |           decrypt
  *  
+    vvvv Somfy Telis Ref vvvv
+   byte
+    0       1        2       3       4       5       6
+|-------|--------|-------|-------|-------|-------|-------|
+|  key  |ctrl|cks|  Rolling Code |   Address(A0|A1|A3)   |
+|-------|--------|-------|-------|-------|-------|-------|
  *  package 56 bit    cnt    key  btn|crc    cnt     serial
  *  0xA7232323312222 - 0   => A7    8 0   | 00 00 | 12 13 00
  *  0xA7222223312222 - 1   => A7    8 5   | 00 01 | 12 13 00
  *  0xA7212123312222 - 2   => A7    8 6   | 00 02 | 12 13 00
+    ^^^^ Somfy Telis Ref ^^^^
+
+Vertilux
+   byte
+    0       1        2       3       4       5       6
+|---------|---------|-------|-------|-------|-------|-------|
+| 0x9|Btn | 0xF|cks |  Rolling Code |   Address(A0|A1|A3)   |
+|---------|---------|-------|-------|-------|-------|-------|
  * 
- * Key: “Encryption Key”, Most significant 4-bit are always 0xA, Least Significant bits is 
- *      a linear counter. In the Smoove Origin this counter is increased together with the 
- *      rolling code. But leaving this on a constant value also works. Gerardwr notes that 
- *      for some other types of remotes the MSB is not constant.
+ * Key: “Encryption Key”, Most significant 4-bit are always 0x9
  * Btn: 4-bit Control codes, this indicates the button that is pressed
  * CRC: 4-bit Checksum.
  * Ctn: 16-bit rolling code (big-endian) increased with every button press.
@@ -584,6 +596,7 @@ static void subghz_protocol_vertilux_check_remote_controller(SubGhzBlockGeneric*
  * 
  *      Btn
  *
+    vvvv Somfy Telis Ref vvvv
  *     Value  Button(s)       Description
  *      0x1     My          Stop or move to favourite position
  *      0x2     Up          Move up
@@ -594,7 +607,16 @@ static void subghz_protocol_vertilux_check_remote_controller(SubGhzBlockGeneric*
  *      0x8     Prog        Used for (de-)registering remotes, see below
  *      0x9     Sun + Flag  Enable sun and wind detector (SUN and FLAG symbol on the Telis Soliris RC)
  *      0xA     Flag        Disable sun detector (FLAG symbol on the Telis Soliris RC)
+    ^^^^ Somfy Telis Ref ^^^^
  * 
+    // So the button mapping is kinda like this
+    //          |   Somfy Telis     |   Vertilux    |   Flipper
+    // ----------------------------------------------------------------
+    //  My      |   0x1             |   0x5         |   Up
+    //  Up      |   0x2             |   0x6         |   Right
+    //  Down    |   0x4             |   0x8         |   Down
+    //  Prog    |   0x8             |   0xC         |   Left
+ *
  *      CRC
  * 
  *      uint8_t frame[7];
@@ -606,7 +628,7 @@ static void subghz_protocol_vertilux_check_remote_controller(SubGhzBlockGeneric*
  */
 
     uint64_t data = instance->data ^ (instance->data >> 8);
-    instance->btn = (data >> 44) & 0xF; // ctrl
+    instance->btn = (data >> 48) & 0xF; // ctrl
     instance->cnt = (data >> 24) & 0xFFFF; // rolling code
     instance->serial = data & 0xFFFFFF; // address
 

@@ -16,6 +16,7 @@
 #include "kia.h"
 #include "hormann.h"
 #include "nero_radio.h"
+#include "vertilux.h"
 #include "somfy_telis.h"
 #include "somfy_keytis.h"
 #include "scher_khan.h"

@@ -699,8 +699,7 @@ static uint8_t subghz_protocol_vertilux_get_btn_code() {
     // for Up is missing...
     // 
     // Looks like this call is made from two entry points
-    // - generating new remotes, where original_btn_code == 0x2 (TODO consider changing this to
-    //  0x6 for vertilux?)
+    // - generating new remotes, where original_btn_code == 0x6
     // - generating for existing remote, where original_btn_code == generic.btn
     //
     // So the button mapping is kinda like this

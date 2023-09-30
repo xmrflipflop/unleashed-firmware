@@ -68,6 +68,14 @@ bool subghz_protocol_somfy_telis_create_data(
     uint16_t cnt,
     SubGhzRadioPreset* preset);
 
+bool subghz_protocol_vertilux_create_data(
+    void* context,
+    FlipperFormat* flipper_format,
+    uint32_t serial,
+    uint8_t btn,
+    uint16_t cnt,
+    SubGhzRadioPreset* preset);
+
 bool subghz_protocol_nice_flor_s_create_data(
     void* context,
     FlipperFormat* flipper_format,

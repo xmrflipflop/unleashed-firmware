@@ -12,6 +12,7 @@ typedef enum {
     SubmenuIndexFaacSLH_868,
     SubmenuIndexBFTClone,
     SubmenuIndexBFTMitto,
+    SubmenuIndexVertilux,
     SubmenuIndexSomfyTelis,
     SubmenuIndexBeninca433,
     SubmenuIndexBeninca868,

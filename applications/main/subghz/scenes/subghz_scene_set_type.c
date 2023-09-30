@@ -51,6 +51,12 @@ void subghz_scene_set_type_on_enter(void* context) {
         subghz);
     submenu_add_item(
         subghz->submenu,
+        "Vertilux 433MHz",
+        SubmenuIndexVertilux,
+        subghz_scene_set_type_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
         "Somfy Telis 433MHz",
         SubmenuIndexSomfyTelis,
         subghz_scene_set_type_submenu_callback,
@@ -656,6 +662,10 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
         case SubmenuIndexSomfyTelis:
             generated_protocol = subghz_txrx_gen_somfy_telis_protocol(
                 subghz->txrx, "AM650", 433420000, key & 0x00FFFFFF, 0x2, 0x0003);
+            break;
+        case SubmenuIndexVertilux:
+            generated_protocol = subghz_txrx_gen_vertilux_protocol(
+                subghz->txrx, "AM650", 433920000, key & 0x00FFFFFF, 0x6, 0x0003);
             break;
         case SubmenuIndexDoorHan_433_92:
             generated_protocol = subghz_txrx_gen_keeloq_protocol(

@@ -99,7 +99,7 @@ void subghz_protocol_encoder_vertilux_free(void* context) {
 
 /**
  * Defines the button value for the current btn_id
- * Basic set | 0x1 | 0x2 | 0x4 | 0x8 |
+ * Basic set | 0x5 | 0x6 | 0x8 | 0xC |
  * @return Button code
  */
 static uint8_t subghz_protocol_vertilux_get_btn_code();
@@ -624,18 +624,18 @@ static void subghz_protocol_vertilux_check_remote_controller(SubGhzBlockGeneric*
 static const char* subghz_protocol_vertilux_get_name_button(uint8_t btn) {
     const char* name_btn[16] = {
         "Unknown",
+        "0x01",
+        "0x02",
+        "0x03",
+        "0x04",
         "My",
         "Up",
-        "My+Up",
-        "Down",
-        "My+Down",
-        "Up+Down",
         "0x07",
-        "Prog",
-        "Sun+Flag",
-        "Flag",
+        "Down",
+        "0x09",
+        "0x0A",
         "0x0B",
-        "0x0C",
+        "Prog",
         "0x0D",
         "0x0E",
         "0x0F"};
@@ -673,23 +673,41 @@ static uint8_t subghz_protocol_vertilux_get_btn_code() {
     uint8_t original_btn_code = subghz_custom_btn_get_original();
     uint8_t btn = original_btn_code;
 
+    // Not quite sure why this was done, because the right flipper button
+    // for Up is missing...
+    // 
+    // Looks like this call is made from two entry points
+    // - generating new remotes, where original_btn_code == 0x2 (TODO consider changing this to
+    //  0x6 for vertilux?)
+    // - generating for existing remote, where original_btn_code == generic.btn
+    //
+    // So the button mapping is kinda like this
+    //          |   Somfy Telis     |   Vertilux    |   Flipper
+    // ----------------------------------------------------------------
+    //  My      |   0x1             |   0x5         |   Up
+    //  Up      |   0x2             |   0x6         |   Right
+    //  Down    |   0x4             |   0x8         |   Down
+    //  Prog    |   0x8             |   0xC         |   Left
+    // 
+    // We gonna just do a like for like swap cuz dunno what the heck is up
+
     // Set custom button
     if((custom_btn_id == SUBGHZ_CUSTOM_BTN_OK) && (original_btn_code != 0)) {
         // Restore original button code
         btn = original_btn_code;
     } else if(custom_btn_id == SUBGHZ_CUSTOM_BTN_UP) {
         switch(original_btn_code) {
-        case 0x1:
-            btn = 0x2;
+        case 0x5:
+            btn = 0x6;
             break;
-        case 0x2:
-            btn = 0x1;
-            break;
-        case 0x4:
-            btn = 0x1;
+        case 0x6:
+            btn = 0x5;
             break;
         case 0x8:
-            btn = 0x1;
+            btn = 0x5;
+            break;
+        case 0xC:
+            btn = 0x5;
             break;
 
         default:
@@ -697,17 +715,17 @@ static uint8_t subghz_protocol_vertilux_get_btn_code() {
         }
     } else if(custom_btn_id == SUBGHZ_CUSTOM_BTN_DOWN) {
         switch(original_btn_code) {
-        case 0x1:
-            btn = 0x4;
+        case 0x5:
+            btn = 0x8;
             break;
-        case 0x2:
-            btn = 0x4;
-            break;
-        case 0x4:
-            btn = 0x2;
+        case 0x6:
+            btn = 0x8;
             break;
         case 0x8:
-            btn = 0x4;
+            btn = 0x6;
+            break;
+        case 0xC:
+            btn = 0x8;
             break;
 
         default:
@@ -715,17 +733,17 @@ static uint8_t subghz_protocol_vertilux_get_btn_code() {
         }
     } else if(custom_btn_id == SUBGHZ_CUSTOM_BTN_LEFT) {
         switch(original_btn_code) {
-        case 0x1:
-            btn = 0x8;
+        case 0x5:
+            btn = 0xC;
             break;
-        case 0x2:
-            btn = 0x8;
-            break;
-        case 0x4:
-            btn = 0x8;
+        case 0x6:
+            btn = 0xC;
             break;
         case 0x8:
-            btn = 0x2;
+            btn = 0xC;
+            break;
+        case 0xC:
+            btn = 0x6;
             break;
 
         default:
